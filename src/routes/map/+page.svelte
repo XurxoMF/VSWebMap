@@ -97,12 +97,12 @@
 
 	/* Zoom In the map by 1 zoom level */
 	let zoomIn = () => {
-		view.animate({ zoom: view.getConstrainedZoom(<number>view.getZoom() + 1) });
+		view.animate({ zoom: view.getConstrainedZoom(<number>view.getZoom() + 1), duration: 200 });
 	};
 
 	/* Zoom Out the map by 1 zoom level */
 	let zoomOut = () => {
-		view.animate({ zoom: view.getConstrainedZoom(<number>view.getZoom() - 1) });
+		view.animate({ zoom: view.getConstrainedZoom(<number>view.getZoom() - 1), duration: 200 });
 	};
 
 	/* Counter for opened modals. Used to prevent multiple modals from opening at the same time. */
@@ -134,7 +134,6 @@
 	></div>
 
 	<!-- Controls -->
-
 	<div id="controls" class="absolute top-2 right-1 bg-zinc-900 w-fit h-fit rounded flex flex-col">
 		<!-- Zoom In -->
 		<button
