@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+	@font-face {
+		font-family: Proxima Nova;
+		font-weight: 400;
+		src: url(/fonts/RocketRinder.woff) format('woff');
+	}
+}
+
+::-webkit-scrollbar {
+	width: 10px;
+}
+
+::-webkit-scrollbar-track-piece {
+	@apply bg-zinc-900;
+}
+
+::-webkit-scrollbar-thumb {
+	@apply rounded-lg;
+	@apply border-2 border-zinc-900 border-solid;
+	@apply bg-zinc-700;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	@apply bg-zinc-600;
+}
+
+::-webkit-scrollbar-button {
+	@apply h-4;
+	@apply rounded-lg;
+	@apply border-2 border-zinc-900 border-solid;
+	@apply bg-zinc-700;
+}
+
+::-webkit-scrollbar-button:hover {
+	@apply bg-zinc-600;
+}

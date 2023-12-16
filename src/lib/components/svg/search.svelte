@@ -1,0 +1,15 @@
+<script lang="ts">
+	export let classe: string = 'h-5 w-5 text-zinc-200';
+</script>
+
+<svg
+	class={classe}
+	aria-hidden="true"
+	xmlns="http://www.w3.org/2000/svg"
+	fill="currentColor"
+	viewBox="0 0 20 20"
+>
+	<path
+		d="M8 15.5a7.5 7.5 0 1 0 0-15 7.5 7.5 0 0 0 0 15Zm11.707 2.793-4-4a1 1 0 0 0-1.414 1.414l4 4a1 1 0 0 0 1.414-1.414Z"
+	/>
+</svg>
