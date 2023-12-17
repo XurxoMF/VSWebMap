@@ -27,10 +27,24 @@
 
 	// MAP COMPONENTS AND PIECES
 
+	/**
+	 * ! IMPORTANT
+	 * For the map to work properly we had to invert cordinates in axis Y so make sure to always
+	 * inver them!
+	 *
+	 * Examples:
+	 *  - If the map return 120, 120 we are changing it to 120, -120.
+	 *  - If the user goes to coordinates 100, -100 we'll send it to 100, 100.
+	 *  - If an imported waypoint have to be placed in 300, 500 we'll place it in 300. -500.
+	 *
+	 * Inver it alwais or it'll not work as OpenLayers works with North + and South - instead of
+	 * North - and South + that is the way the in-game coordinates works.
+	 */
+
 	/* Map view */
 	let view = new View({
 		extent: mapConfig.extent,
-		center: [currentX, currentY],
+		center: [currentX, -currentY],
 		constrainResolution: true,
 		zoom: currentZoom,
 		resolutions: [256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5, 0.25, 0.125]
@@ -43,7 +57,6 @@
 		wrapX: false,
 		tileGrid: new TileGrid({
 			extent: mapConfig.extent,
-			origin: mapConfig.origin,
 			resolutions: mapConfig.resolutions,
 			tileSize: mapConfig.tileSize
 		})
@@ -62,7 +75,7 @@
 		let mousePosition = new MousePosition({
 			coordinateFormat: (coordinate) => {
 				if (coordinate) {
-					return toStringXY([coordinate[0], coordinate[1]]);
+					return toStringXY([coordinate[0], -coordinate[1]]);
 				}
 				return '0, 0';
 			},
@@ -83,7 +96,7 @@
 		// Change url to the current coordinates
 		map.on('moveend', () => {
 			currentX = Math.round(<number>map.getView().getCenter()?.at(0));
-			currentY = Math.round(<number>map.getView().getCenter()?.at(1));
+			currentY = -Math.round(<number>map.getView().getCenter()?.at(1));
 			currentZoom = <number>map.getView().getZoom();
 
 			searchParams.set('x', currentX ? currentX.toString() : '0');
@@ -113,7 +126,7 @@
 	let goToCoordinatesActive = false;
 	let goToCoordinatesConfirm = (x: HTMLInputElement, y: HTMLInputElement) => {
 		let toX = Number(x.value == '' ? 0 : x.value);
-		let toY = Number(y.value == '' ? 0 : y.value);
+		let toY = -Number(y.value == '' ? 0 : y.value);
 
 		goToCoordinatesActive = false;
 		--activeModalsCounter;
