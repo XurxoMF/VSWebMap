@@ -13,6 +13,7 @@
 	import { ZoomInSVG, ZoomOutSVG, SearchSVG } from '$lib/components/svg/index';
 	import { GoToCoordinatesModal } from '$lib/components/modals';
 	import { mapConfig, mapTexts } from '$lib/map-config';
+	import { getFriendlyCoord, getLiteralCoord } from '$lib/helpers';
 
 	// Where the coordinates will be rendered
 	let coordinatesDiv: HTMLDivElement;
@@ -21,30 +22,33 @@
 	let searchParams = $page.url.searchParams;
 
 	// Coordinates where the map is currently positioned
-	let currentX = searchParams.has('x') ? Number(searchParams.get('x')) : 0;
-	let currentY = searchParams.has('y') ? Number(searchParams.get('y')) : 0;
+	let currentX = searchParams.has('x') ? Number(searchParams.get('x')) : mapConfig.center[0];
+	let currentY = searchParams.has('y') ? Number(searchParams.get('y')) : mapConfig.center[0];
 	let currentZoom = searchParams.has('zoom') ? Number(searchParams.get('zoom')) : 8;
 
 	// MAP COMPONENTS AND PIECES
 
-	/**
-	 * ! IMPORTANT
-	 * For the map to work properly we had to invert cordinates in axis Y so make sure to always
-	 * inver them!
-	 *
-	 * Examples:
-	 *  - If the map return 120, 120 we are changing it to 120, -120.
-	 *  - If the user goes to coordinates 100, -100 we'll send it to 100, 100.
-	 *  - If an imported waypoint have to be placed in 300, 500 we'll place it in 300. -500.
-	 *
-	 * Inver it alwais or it'll not work as OpenLayers works with North + and South - instead of
-	 * North - and South + that is the way the in-game coordinates works.
-	 */
+	/* 
+	 IMPORTANT
+
+	 For the map to work properly we had to invert user friendly cordinates in axis X so make sure to always
+	 invert them!
+
+	 If you're trying to get literal coordinates you've to invert the user friendly value.
+
+	 Examples:
+	  - getFriendlyCoord(512100) will return 100 but we have to invert it. -getFriendlyCoord(512100) will return -100.
+	  - getLiteralCoord(100) will return 512100 but we have to invert it. getLiteralCoord(-100) will return 511900.
+
+	 It may seem strange at first, but coordinates in x are inverted so if the user wants to go to x=100 and we get the literal coord with getLiteralCoord(100) it'll give us the opposite coordinate(100 blocks in the wrong direction) so we have to get it with getLiteralCoord(-100) to get the right coordinate(100 block in the right direction)...
+
+	 Idk I'm not good at explaining this things lol. Pls don judge me.
+	*/
 
 	/* Map view */
 	let view = new View({
 		extent: mapConfig.extent,
-		center: [currentX, -currentY],
+		center: [getLiteralCoord(currentX), getLiteralCoord(currentY)],
 		constrainResolution: true,
 		zoom: currentZoom,
 		resolutions: [256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5, 0.25, 0.125]
@@ -75,7 +79,7 @@
 		let mousePosition = new MousePosition({
 			coordinateFormat: (coordinate) => {
 				if (coordinate) {
-					return toStringXY([coordinate[0], -coordinate[1]]);
+					return toStringXY([-getFriendlyCoord(coordinate[0]), getFriendlyCoord(coordinate[1])]);
 				}
 				return '0, 0';
 			},
@@ -95,8 +99,8 @@
 
 		// Change url to the current coordinates
 		map.on('moveend', () => {
-			currentX = Math.round(<number>map.getView().getCenter()?.at(0));
-			currentY = -Math.round(<number>map.getView().getCenter()?.at(1));
+			currentX = -getFriendlyCoord(Math.round(<number>map.getView().getCenter()?.at(0)));
+			currentY = getFriendlyCoord(Math.round(<number>map.getView().getCenter()?.at(1)));
 			currentZoom = <number>map.getView().getZoom();
 
 			searchParams.set('x', currentX ? currentX.toString() : '0');
@@ -125,8 +129,8 @@
 	/* Go to the specified coordinates */
 	let goToCoordinatesActive = false;
 	let goToCoordinatesConfirm = (x: HTMLInputElement, y: HTMLInputElement) => {
-		let toX = Number(x.value == '' ? 0 : x.value);
-		let toY = -Number(y.value == '' ? 0 : y.value);
+		let toX = getLiteralCoord(-Number(x.value == '' ? 0 : x.value));
+		let toY = getLiteralCoord(Number(y.value == '' ? 0 : y.value));
 
 		goToCoordinatesActive = false;
 		--activeModalsCounter;
