@@ -23,3 +23,13 @@ export const getFriendlyCoord = (coordinate: number): number => {
 export const getLiteralCoord = (coordinate: number): number => {
 	return mapConfig.center[0] - coordinate;
 };
+/**
+ * Change an absolute coordinate to the opposite side of the map.
+ * Example: 512001 => 511999
+ *
+ * @param {number} coordinate Absolute coordinate to convert
+ * @return { number } New coodrinate
+ */
+export const getOppositeAbsolute = (coordinate: number): number => {
+	return -(coordinate - mapConfig.center[0] - mapConfig.center[0]);
+};

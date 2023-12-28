@@ -2,16 +2,16 @@
 	import { CheckSVG, CrossSVG } from '$lib/components/svg';
 	import { mapTexts } from '$lib/map-config';
 
-	export let onConfirm: (x: HTMLInputElement, y: HTMLInputElement) => void;
+	export let onConfirm: (x: HTMLInputElement, z: HTMLInputElement) => void;
 	export let onClose: () => void;
 
 	let x: HTMLInputElement;
-	let y: HTMLInputElement;
+	let z: HTMLInputElement;
 
 	let modalSubmit = (e: SubmitEvent) => {
 		e.preventDefault();
 
-		onConfirm(x, y);
+		onConfirm(x, z);
 	};
 </script>
 
@@ -28,10 +28,10 @@
 				class="text-center bg-zinc-200 rounded"
 			/>
 			<input
-				bind:this={y}
+				bind:this={z}
 				type="number"
-				name="y"
-				placeholder={mapTexts.goToCoordinatesYPlaceholder}
+				name="z"
+				placeholder={mapTexts.goToCoordinatesZPlaceholder}
 				class="text-center bg-zinc-200 rounded"
 			/>
 			<div class="flex justify-around">

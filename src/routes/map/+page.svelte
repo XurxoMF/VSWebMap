@@ -1,32 +1,25 @@
 <script lang="ts">
-	import 'ol/ol.css';
-	import Map from 'ol/Map';
-	import View from 'ol/View';
-	import TileLayer from 'ol/layer/Tile';
-	import Tile from 'ol/source/TileImage';
-	import TileGrid from 'ol/tilegrid/TileGrid';
 	import { onMount } from 'svelte';
-	import MousePosition from 'ol/control/MousePosition';
+	// OL imports
+	import 'ol/ol.css';
+	import { Feature, Map, View } from 'ol';
 	import { toStringXY } from 'ol/coordinate';
+	import { GeoJSON } from 'ol/format';
+	import { Tile as TileLayer, Vector as VectorLayer, Group as LayerGroup } from 'ol/layer';
+	import { Icon, Style, Text, Fill, Stroke } from 'ol/style';
+	import { TileImage as Tile, Vector as VectorSource } from 'ol/source';
+	import TileGrid from 'ol/tilegrid/TileGrid';
+	import MousePosition from 'ol/control/MousePosition';
+	import { Point, type Geometry, LineString, MultiPoint } from 'ol/geom';
+	// Other imports
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import { ZoomInSVG, ZoomOutSVG, SearchSVG } from '$lib/components/svg/index';
 	import { GoToCoordinatesModal } from '$lib/components/modals';
-	import { mapConfig, mapTexts } from '$lib/map-config';
-	import { getFriendlyCoord, getLiteralCoord } from '$lib/helpers';
-
-	// Where the coordinates will be rendered
-	let coordinatesDiv: HTMLDivElement;
-
-	// URL search params
-	let searchParams = $page.url.searchParams;
-
-	// Coordinates where the map is currently positioned
-	let currentX = searchParams.has('x') ? Number(searchParams.get('x')) : mapConfig.center[0];
-	let currentY = searchParams.has('y') ? Number(searchParams.get('y')) : mapConfig.center[0];
-	let currentZoom = searchParams.has('zoom') ? Number(searchParams.get('zoom')) : 8;
-
-	// MAP COMPONENTS AND PIECES
+	import { mapConfig, mapTexts, waypointConfig } from '$lib/map-config';
+	import { getFriendlyCoord, getLiteralCoord, getOppositeAbsolute } from '$lib/helpers';
+	import type { FeatureLike } from 'ol/Feature';
+	import type RenderFeature from 'ol/render/Feature';
 
 	/* 
 	 IMPORTANT
@@ -45,10 +38,27 @@
 	 Idk I'm not good at explaining this things lol. Pls don judge me.
 	*/
 
+	// Where the coordinates will be rendered
+	let coordinatesDiv: HTMLDivElement;
+
+	// URL search params
+	let searchParams = $page.url.searchParams;
+
+	// Coordinates where the map is currently positioned
+	let currentX = searchParams.has('x')
+		? Number(searchParams.get('x'))
+		: -getFriendlyCoord(mapConfig.center[0]);
+	let currentY = searchParams.has('y')
+		? Number(searchParams.get('y'))
+		: getFriendlyCoord(mapConfig.center[0]);
+	let currentZoom = searchParams.has('zoom') ? Number(searchParams.get('zoom')) : 8;
+
+	// MAP COMPONENTS AND PIECES
+
 	/* Map view */
 	let view = new View({
 		extent: mapConfig.extent,
-		center: [getLiteralCoord(currentX), getLiteralCoord(currentY)],
+		center: [getLiteralCoord(-currentX), getLiteralCoord(currentY)],
 		constrainResolution: true,
 		zoom: currentZoom,
 		resolutions: [256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5, 0.25, 0.125]
@@ -72,6 +82,181 @@
 		extent: mapConfig.extent
 	});
 
+	// WAYPOINT IMPORTS
+
+	type WaypointsType = {
+		traders: { type: string; layer: VectorLayer<VectorSource> }[];
+		translocators: VectorLayer<VectorSource>;
+		waypoints: { type: string; layer: VectorLayer<VectorSource> }[];
+	};
+
+	let waypointLayers: WaypointsType = {
+		traders: [],
+		translocators: new VectorLayer<VectorSource>(),
+		waypoints: []
+	};
+
+	// Trader import
+	waypointConfig.traders.forEach((type) => {
+		let vectorSource = new VectorSource({
+			loader: (extent, resolution, projection) => {
+				const format = new GeoJSON();
+				fetch('/map_data/geojson/traders.geojson')
+					.then((response) => response.json())
+					.then((json) => {
+						let features = <Feature<Geometry>[]>format.readFeatures(json, {
+							featureProjection: projection
+						});
+
+						features = features.filter((f) => f.getProperties()['wares'] == type.type);
+
+						features.forEach((feature) => {
+							const geometry = feature.getGeometry();
+							if (geometry instanceof Point) {
+								let coords = geometry.getCoordinates();
+								geometry.setCoordinates([coords[0], getOppositeAbsolute(coords[1])]);
+							}
+						});
+
+						vectorSource.addFeatures(features);
+					});
+			}
+		});
+
+		let vectorLayer = new VectorLayer({
+			minZoom: typeof (type.minZoom - 1) == 'number' ? type.minZoom - 1 : 4,
+			source: vectorSource,
+			style: (feature) => {
+				return new Style({
+					image: new Icon({
+						color: type.rgb || [0, 0, 0],
+						opacity: 1,
+						src: type.icon || '/map_icons/trader.svg'
+					}),
+					text: new Text({
+						font: 'bolder .6rem monospace',
+						text: feature.get('name'),
+						textAlign: 'center',
+						textBaseline: 'top',
+						offsetY: 12,
+						fill: new Fill({ color: [0, 0, 0] }),
+						stroke: new Stroke({ color: [255, 255, 255, 0.6], width: 3 })
+					})
+				});
+			}
+		});
+
+		waypointLayers.traders.push({ type: type.type, layer: vectorLayer });
+	});
+
+	// Waypoint import
+	waypointConfig.waypoints.forEach((type) => {
+		let vectorSource = new VectorSource({
+			loader: (extent, resolution, projection) => {
+				const format = new GeoJSON();
+				fetch('/map_data/geojson/landmarks.geojson')
+					.then((response) => response.json())
+					.then((json) => {
+						let features = <Feature<Geometry>[]>format.readFeatures(json);
+
+						features = features.filter((f) => f.getProperties()['type'] == type.type);
+
+						features.forEach((feature) => {
+							const geometry = feature.getGeometry();
+							if (geometry instanceof Point) {
+								let coords = geometry.getCoordinates();
+								geometry.setCoordinates([coords[0], getOppositeAbsolute(coords[1])]);
+							}
+						});
+
+						vectorSource.addFeatures(features);
+					});
+			}
+		});
+
+		let vectorLayer = new VectorLayer({
+			minZoom: typeof (type.minZoom - 1) == 'number' ? type.minZoom - 1 : 1,
+			source: vectorSource,
+			style: (feature) => {
+				return new Style({
+					image: new Icon({
+						color: type.rgb || [0, 0, 0],
+						opacity: 1,
+						src: type.icon || '/map_icons/star1.svg'
+					}),
+					text: new Text({
+						font: 'bolder .6rem monospace',
+						text: feature.get('label'),
+						textAlign: 'center',
+						textBaseline: 'top',
+						offsetY: 12,
+						fill: new Fill({ color: [0, 0, 0] }),
+						stroke: new Stroke({ color: [255, 255, 255, 0.6], width: 3 })
+					})
+				});
+			}
+		});
+
+		waypointLayers.waypoints.push({ type: type.type, layer: vectorLayer });
+	});
+
+	// Translocator import
+	if (waypointConfig.translocators) {
+		let type = waypointConfig.translocators;
+
+		let vectorSource = new VectorSource({
+			loader: (extent, resolution, projection) => {
+				const format = new GeoJSON();
+				fetch('/map_data/geojson/translocators.geojson')
+					.then((response) => response.json())
+					.then((json) => {
+						let features = <Feature<Geometry>[]>format.readFeatures(json);
+
+						features.forEach((feature) => {
+							const geometry = feature.getGeometry();
+							if (geometry instanceof LineString) {
+								let coords = geometry.getCoordinates();
+								geometry.setCoordinates([
+									[coords[0][0], getOppositeAbsolute(coords[0][1])],
+									[coords[1][0], getOppositeAbsolute(coords[1][1])]
+								]);
+							}
+						});
+
+						vectorSource.addFeatures(features);
+					});
+			}
+		});
+
+		let vectorLayer = new VectorLayer({
+			minZoom: typeof (type.minZoom - 1) == 'number' ? type.minZoom - 1 : 1,
+			source: vectorSource,
+			style: (feature) => {
+				return [
+					new Style({
+						stroke: new Stroke({
+							color: type.rgb || [0, 0, 0],
+							width: 2
+						})
+					}),
+					new Style({
+						image: new Icon({
+							color: type.rgb || [0, 0, 0],
+							opacity: 1,
+							src: type.icon || '/map_icons/spiral.svg'
+						}),
+						geometry: (feature) => {
+							// @ts-ignore
+							return new MultiPoint(feature.getGeometry().getCoordinates());
+						}
+					})
+				];
+			}
+		});
+
+		waypointLayers.translocators = vectorLayer;
+	}
+
 	onMount(() => {
 		// SOME MAP FUNCTIONS
 
@@ -90,7 +275,12 @@
 		// Map generation
 		const map = new Map({
 			target: 'map',
-			layers: [mapLayer],
+			layers: [
+				mapLayer,
+				...waypointLayers.traders.map((e) => e.layer),
+				...waypointLayers.waypoints.map((e) => e.layer),
+				waypointLayers.translocators
+			],
 			view: view,
 			controls: [mousePosition]
 		});
@@ -105,7 +295,7 @@
 
 			searchParams.set('x', currentX ? currentX.toString() : '0');
 			searchParams.set('y', currentY ? currentY.toString() : '0');
-			searchParams.set('zoom', currentZoom ? currentZoom.toString() : '8');
+			searchParams.set('zoom', currentZoom ? currentZoom.toString() : '0');
 			goto(`?${searchParams.toString()}`);
 		});
 	});
@@ -128,14 +318,14 @@
 
 	/* Go to the specified coordinates */
 	let goToCoordinatesActive = false;
-	let goToCoordinatesConfirm = (x: HTMLInputElement, y: HTMLInputElement) => {
+	let goToCoordinatesConfirm = (x: HTMLInputElement, z: HTMLInputElement) => {
 		let toX = getLiteralCoord(-Number(x.value == '' ? 0 : x.value));
-		let toY = getLiteralCoord(Number(y.value == '' ? 0 : y.value));
+		let toZ = getLiteralCoord(Number(z.value == '' ? 0 : z.value));
 
 		goToCoordinatesActive = false;
 		--activeModalsCounter;
 
-		view.animate({ center: [toX, toY] });
+		view.animate({ center: [toX, toZ] });
 	};
 </script>
 
