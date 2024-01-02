@@ -97,7 +97,7 @@
 	};
 
 	// Trader import
-	waypointConfig.traders.forEach((type) => {
+	waypointConfig.traders.values.forEach((type) => {
 		let vectorSource = new VectorSource({
 			loader: (extent, resolution, projection) => {
 				const format = new GeoJSON();
@@ -150,7 +150,7 @@
 	});
 
 	// Waypoint import
-	waypointConfig.waypoints.forEach((type) => {
+	waypointConfig.waypoints.values.forEach((type) => {
 		let vectorSource = new VectorSource({
 			loader: (extent, resolution, projection) => {
 				const format = new GeoJSON();
