@@ -1,10 +1,6 @@
 services:
   webmap:
-    image: node:lts-alpine
+    build: .
     restart: unless-stopped
     ports:
-      - 80:3000
-    volumes:
-      - ./:/app
-    working_dir: /app
-    command: npm run build-prod
+      - 80:80
