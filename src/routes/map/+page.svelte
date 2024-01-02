@@ -18,8 +18,6 @@
 	import { GoToCoordinatesModal } from '$lib/components/modals';
 	import { mapConfig, mapTexts, waypointConfig } from '$lib/map-config';
 	import { getFriendlyCoord, getLiteralCoord, getOppositeAbsolute } from '$lib/helpers';
-	import type { FeatureLike } from 'ol/Feature';
-	import type RenderFeature from 'ol/render/Feature';
 
 	/* 
 	 IMPORTANT
