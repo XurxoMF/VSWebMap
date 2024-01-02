@@ -5,7 +5,7 @@
 	import { Feature, Map, View } from 'ol';
 	import { toStringXY } from 'ol/coordinate';
 	import { GeoJSON } from 'ol/format';
-	import { Tile as TileLayer, Vector as VectorLayer, Group as LayerGroup } from 'ol/layer';
+	import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer';
 	import { Icon, Style, Text, Fill, Stroke } from 'ol/style';
 	import { TileImage as Tile, Vector as VectorSource } from 'ol/source';
 	import TileGrid from 'ol/tilegrid/TileGrid';
