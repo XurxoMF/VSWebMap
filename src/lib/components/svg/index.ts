@@ -4,3 +4,7 @@ export { default as ZoomOutSVG } from './zoom-out.svelte';
 export { default as SearchSVG } from './search.svelte';
 export { default as CheckSVG } from './check.svelte';
 export { default as CrossSVG } from './cross.svelte';
+export { default as VisibleSVG } from './visible.svelte';
+export { default as HiddenSVG } from './hidden.svelte';
+export { default as ArrowDownSVG } from './arrow-down.svelte';
+export { default as ArrowUpSVG } from './arrow-up.svelte';

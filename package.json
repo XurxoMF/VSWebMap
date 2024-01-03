@@ -7,7 +7,7 @@
 		"build": "vite build",
 		"install-build": "npm install && vite build",
 		"dockerize-build": "docker compose -f docker-compose.build.yml up",
-		"dockerize": "docker compose -f docker-compose.prod.yml up -d",
+		"dockerize": "docker compose -f docker-compose.prod.yml stop && docker compose -f docker-compose.prod.yml up -d",
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
