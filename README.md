@@ -6,8 +6,8 @@ To get the map and markers you've to use WebCartographer mod by Th3Dilli.
 
 I'll make a better guide in the future.
 
-`npm run dockerize` to build for production and host using docker.
+`npm run dockerize-build` to build for production.
 
-`npm run build-prod` to build for production and host using you local computer.
+`npm run dockerize` host it using httpd container.
 
 Can be accessed in `localhost`
