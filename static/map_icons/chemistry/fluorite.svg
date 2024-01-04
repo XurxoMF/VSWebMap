@@ -1,0 +1,7 @@
+<svg width="1.1rem" height="1.1rem" stroke="#000073" stroke-width=".067rem" viewBox="0 0 33.867 33.867" xmlns="http://www.w3.org/2000/svg">
+   <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%" gradientTransform="rotate(-45)">
+      <stop offset="0%" style="stop-color:#50ff9c;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#000073;stop-opacity:1" />
+   </linearGradient>
+   <path d="M14.07 31.038H7.857V1.267h17.054v5.17h-10.84v7.672h10.09v5.17H14.07z" fill="url(#gradient)" />
+</svg>

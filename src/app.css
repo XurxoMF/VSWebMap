@@ -16,6 +16,7 @@
 
 ::-webkit-scrollbar-track-piece {
 	@apply bg-zinc-900;
+	@apply rounded-lg;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -25,16 +26,5 @@
 }
 
 ::-webkit-scrollbar-thumb:hover {
-	@apply bg-zinc-600;
-}
-
-::-webkit-scrollbar-button {
-	@apply h-4;
-	@apply rounded-lg;
-	@apply border-2 border-zinc-900 border-solid;
-	@apply bg-zinc-700;
-}
-
-::-webkit-scrollbar-button:hover {
 	@apply bg-zinc-600;
 }

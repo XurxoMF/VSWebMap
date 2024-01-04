@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
+	import { writable } from 'svelte/store';
 	// OL imports
 	import 'ol/ol.css';
 	import { Feature, Map, View } from 'ol';
@@ -22,12 +23,12 @@
 		VisibleSVG,
 		HiddenSVG,
 		ArrowDownSVG,
-		ArrowUpSVG
+		ArrowUpSVG,
+		VRulerSVG
 	} from '$lib/components/svg/index';
-	import { GoToCoordinatesModal } from '$lib/components/modals';
+	import { GoToCoordinatesModal, ChangeIconSizeModal } from '$lib/components/modals';
 	import { mapConfig, mapTexts, waypointConfig } from '$lib/map-config';
 	import { getFriendlyCoord, getLiteralCoord, getOppositeAbsolute } from '$lib/helpers';
-	import { writable } from 'svelte/store';
 
 	/* 
 	 IMPORTANT
@@ -90,17 +91,41 @@
 		extent: mapConfig.extent
 	});
 
+	// Icon size
+	let iconSize = writable(1.2);
+
+	const localIconSize = localStorage.getItem('is');
+
+	// Sets the initial visibility of the menus with the one saved on the local storage
+	if (localIconSize != null) {
+		let ls: number = JSON.parse(localIconSize);
+
+		iconSize.update(() => ls);
+	}
+
+	// Save the states of the dropdown menus on the local storage when the state changes
+	const iconSizeUnsuscribe = iconSize.subscribe((value) => {
+		localStorage.setItem('is', JSON.stringify(value));
+	});
+
 	// WAYPOINT IMPORTS
 
 	type WaypointsType = {
-		traders?: { type: string; layer: VectorLayer<VectorSource> }[];
-		translocators?: { type: string; layer: VectorLayer<VectorSource> }[];
-		waypoints?: { type: string; layer: VectorLayer<VectorSource> }[];
+		traders: { type: string; layer: VectorLayer<VectorSource> }[];
+		translocators: { type: string; layer: VectorLayer<VectorSource> }[];
+		waypoints: { type: string; layer: VectorLayer<VectorSource> }[];
 	};
 
-	let waypointLayers: WaypointsType = {};
+	/**
+	 * Waypoint layers shown on the map.
+	 */
+	let waypointLayers: WaypointsType = {
+		traders: [],
+		translocators: [],
+		waypoints: []
+	};
 
-	// Trader import
+	// Traders import
 	waypointConfig.traders.values.forEach((type) => {
 		let vectorSource = new VectorSource({
 			loader: (extent, resolution, projection) => {
@@ -134,19 +159,20 @@
 			style: (feature) => {
 				return new Style({
 					image: new Icon({
-						color: type.rgb || [0, 0, 0],
+						scale: $iconSize,
 						opacity: 1,
-						src: type.icon || '/map_icons/trader.svg'
-					}),
-					text: new Text({
-						font: 'bolder .6rem monospace',
-						text: feature.get('name'),
-						textAlign: 'center',
-						textBaseline: 'top',
-						offsetY: 12,
-						fill: new Fill({ color: [0, 0, 0] }),
-						stroke: new Stroke({ color: [255, 255, 255, 0.6], width: 3 })
+						src: type.icon || '/map_icons/in-game/trader.svg'
 					})
+					// text: new Text({
+					// 	font: `bold 1rem monospace`,
+					// 	scale: $iconSize / 2,
+					// 	text: feature.get('name'),
+					// 	textAlign: 'center',
+					// 	textBaseline: 'top',
+					// 	offsetY: 18,
+					// 	fill: new Fill({ color: [255, 255, 255] }),
+					// 	stroke: new Stroke({ color: [0, 0, 0, 1], width: 5 })
+					// })
 				});
 			}
 		});
@@ -156,7 +182,7 @@
 		waypointLayers.traders.push({ type: type.type, layer: vectorLayer });
 	});
 
-	// Waypoint import
+	// Waypoints import
 	waypointConfig.waypoints.values.forEach((type) => {
 		let vectorSource = new VectorSource({
 			loader: (extent, resolution, projection) => {
@@ -188,18 +214,19 @@
 			style: (feature) => {
 				return new Style({
 					image: new Icon({
-						color: type.rgb || [0, 0, 0],
+						scale: $iconSize,
 						opacity: 1,
-						src: type.icon || '/map_icons/star1.svg'
+						src: type.icon || '/map_icons/in-game/star1.svg'
 					}),
 					text: new Text({
-						font: 'bolder .6rem monospace',
+						font: `bolder 1rem monospace`,
+						scale: $iconSize / 2,
 						text: feature.get('label'),
 						textAlign: 'center',
 						textBaseline: 'top',
-						offsetY: 12,
-						fill: new Fill({ color: [0, 0, 0] }),
-						stroke: new Stroke({ color: [255, 255, 255, 0.6], width: 3 })
+						offsetY: 18,
+						fill: new Fill({ color: [255, 255, 255] }),
+						stroke: new Stroke({ color: [0, 0, 0, 1], width: 5 })
 					})
 				});
 			}
@@ -210,7 +237,7 @@
 		waypointLayers.waypoints.push({ type: type.type, layer: vectorLayer });
 	});
 
-	// Translocator import
+	// Translocators import
 	waypointConfig.translocators.values.forEach((type) => {
 		let vectorSource = new VectorSource({
 			loader: (extent, resolution, projection) => {
@@ -250,9 +277,9 @@
 					}),
 					new Style({
 						image: new Icon({
-							color: type.rgb || [0, 0, 0],
+							scale: $iconSize,
 							opacity: 1,
-							src: type.icon || '/map_icons/spiral.svg'
+							src: type.icon || '/map_icons/in-game/spiral.svg'
 						}),
 						geometry: (feature) => {
 							// @ts-ignore
@@ -277,6 +304,12 @@
 		waypoints: boolean;
 	};
 
+	/**
+	 * State of each legend dropdown menu.
+	 *
+	 * - `true` = Opened
+	 * - `false` = Closed
+	 */
 	let legendMenusStates = writable<LegendMenuStates>({
 		traders: false,
 		translocators: false,
@@ -285,21 +318,28 @@
 
 	const localMenuStates = localStorage.getItem('lms');
 
+	// Sets the initial visibility of the menus with the one saved on the local storage
 	if (localMenuStates != null) {
 		let lms: LegendMenuStates = JSON.parse(localMenuStates);
 
 		legendMenusStates.update(() => lms);
 	}
 
+	// Save the states of the dropdown menus on the local storage when the state changes
 	const legendMenusStatesUnsuscribe = legendMenusStates.subscribe((value) => {
 		localStorage.setItem('lms', JSON.stringify(value));
 	});
 
-	// States of the waypoint layers visibility
+	/**
+	 * States of the waypoint layers visibility.
+	 */
 	let legendWaypointStates = writable<Set<string>>(new Set());
 
+	// State of the waypoints stored on the local storage
 	const localWaypointStates = localStorage.getItem('lws');
 
+	/* Sets the initial visibility of the waypoints with the one saved on the local storage 
+	   or set them all to visible if there is no local storage config */
 	if (localWaypointStates != null) {
 		let lws: string[] = JSON.parse(localWaypointStates);
 
@@ -309,45 +349,54 @@
 	} else {
 		legendWaypointStates.update(() => {
 			let newStates = new Set<string>();
-			waypointLayers.traders?.forEach((e) =>
+			waypointLayers.traders.forEach((e) =>
 				newStates.add(`${waypointConfig.traders.group}-${e.type}`)
 			);
-			waypointLayers.translocators?.forEach((e) =>
+			waypointLayers.translocators.forEach((e) =>
 				newStates.add(`${waypointConfig.translocators.group}-${e.type}`)
 			);
-			waypointLayers.waypoints?.forEach((e) =>
+			waypointLayers.waypoints.forEach((e) =>
 				newStates.add(`${waypointConfig.waypoints.group}-${e.type}`)
 			);
 			return newStates;
 		});
 	}
 
-	waypointLayers.traders?.forEach((e) =>
+	// Set the initial visibility of the waypoints when loading the page
+	waypointLayers.traders.forEach((e) =>
 		e.layer.setVisible($legendWaypointStates.has(`${waypointConfig.traders.group}-${e.type}`))
 	);
-	waypointLayers.translocators?.forEach((e) =>
+	waypointLayers.translocators.forEach((e) =>
 		e.layer.setVisible($legendWaypointStates.has(`${waypointConfig.translocators.group}-${e.type}`))
 	);
-	waypointLayers.waypoints?.forEach((e) =>
+	waypointLayers.waypoints.forEach((e) =>
 		e.layer.setVisible($legendWaypointStates.has(`${waypointConfig.waypoints.group}-${e.type}`))
 	);
 
+	// Save the states of the waypoint visibility on the local storage when the state changes
 	const legendWaypointStatesUnsuscribe = legendWaypointStates.subscribe((value) => {
 		localStorage.setItem('lws', JSON.stringify([...value]));
 	});
 
+	/**
+	 * Change the visibility of a layer.
+	 *
+	 * @param {string} group Group ID. `waypointConfig.group` is used by default.
+	 * @param {string} type Layer ID. `waypointConfig.type` is used by default.
+	 * @param {boolean} state `True` to show, `false` to hide.
+	 */
 	const toggleWaypointVisivility = (group: string, type: string, state: boolean): void => {
 		switch (group) {
 			case waypointConfig.traders.group:
-				const trader = waypointLayers.traders?.find((e) => e.type == type);
+				const trader = waypointLayers.traders.find((e) => e.type == type);
 				trader?.layer.setVisible(state);
 				break;
 			case waypointConfig.translocators.group:
-				const translocator = waypointLayers.translocators?.find((e) => e.type == type);
+				const translocator = waypointLayers.translocators.find((e) => e.type == type);
 				translocator?.layer.setVisible(state);
 				break;
 			case waypointConfig.waypoints.group:
-				const waypoint = waypointLayers.waypoints?.find((e) => e.type == type);
+				const waypoint = waypointLayers.waypoints.find((e) => e.type == type);
 				waypoint?.layer.setVisible(state);
 				break;
 			default:
@@ -367,20 +416,26 @@
 		}
 	};
 
+	/**
+	 * Change the visibility of all the layers on a group.
+	 *
+	 * @param {string} group Group ID. `waypointConfig.group` is used by default.
+	 * @param {boolean} state `True` to show, `false` to hide.
+	 */
 	const toggleWaypointGroupVisivility = (group: string, state: boolean): void => {
 		switch (group) {
 			case waypointConfig.traders.group:
-				waypointLayers.traders?.forEach((e) => {
+				waypointLayers.traders.forEach((e) => {
 					toggleWaypointVisivility(group, e.type, state);
 				});
 				break;
 			case waypointConfig.translocators.group:
-				waypointLayers.translocators?.forEach((e) => {
+				waypointLayers.translocators.forEach((e) => {
 					toggleWaypointVisivility(group, e.type, state);
 				});
 				break;
 			case waypointConfig.waypoints.group:
-				waypointLayers.waypoints?.forEach((e) => {
+				waypointLayers.waypoints.forEach((e) => {
 					toggleWaypointVisivility(group, e.type, state);
 				});
 				break;
@@ -392,7 +447,7 @@
 	onMount(() => {
 		// SOME MAP FUNCTIONS
 
-		/* Used to display coordinates at the bottom of the map */
+		// Used to display coordinates at the bottom of the map
 		let mousePosition = new MousePosition({
 			coordinateFormat: (coordinate) => {
 				if (coordinate) {
@@ -408,11 +463,11 @@
 		const layers: BaseLayer[] = [mapLayer];
 
 		if (waypointLayers.traders != undefined)
-			layers.push(...waypointLayers.traders?.map((e) => e.layer));
+			layers.push(...waypointLayers.traders.map((e) => e.layer));
 		if (waypointLayers.waypoints != undefined)
-			layers.push(...waypointLayers.waypoints?.map((e) => e.layer));
+			layers.push(...waypointLayers.waypoints.map((e) => e.layer));
 		if (waypointLayers.translocators != undefined)
-			layers.push(...waypointLayers.translocators?.map((e) => e.layer));
+			layers.push(...waypointLayers.translocators.map((e) => e.layer));
 
 		// Map generation
 		const map = new Map({
@@ -421,8 +476,6 @@
 			view: view,
 			controls: [mousePosition]
 		});
-
-		// MORE MAP FUNCTIONS XD
 
 		// Change url to the current coordinates
 		map.on('moveend', () => {
@@ -437,24 +490,33 @@
 		});
 	});
 
-	// EVEN MORE FUNCTIONS THAT NEEDS TO BE OUTSITE THE ONMOUNT()
+	// FUNCTIONS THAT NEEDS TO BE OUTSITE THE ONMOUNT()
 
-	/* Zoom In the map by 1 zoom level */
+	/**
+	 * Zoom In the map by 1 zoom level.
+	 */
 	let zoomIn = () => {
 		view.animate({ zoom: view.getConstrainedZoom(<number>view.getZoom() + 1), duration: 200 });
 	};
 
-	/* Zoom Out the map by 1 zoom level */
+	/**
+	 * Zoom Out the map by 1 zoom level.
+	 */
 	let zoomOut = () => {
 		view.animate({ zoom: view.getConstrainedZoom(<number>view.getZoom() - 1), duration: 200 });
 	};
 
-	/* Counter for opened modals. Used to prevent multiple modals from opening at the same time. */
-	/* 0 = No modal opened, 1 = Only current modal opened(can be opened)*/
+	/**
+	 * Counter for opened modals. Used to prevent multiple modals from opening at the same time.
+	 */
 	let activeModalsCounter = 0;
 
-	/* Go to the specified coordinates */
+	// If the modal should be shown or not
 	let goToCoordinatesActive = false;
+
+	/**
+	 * Go to the specified coordinates.
+	 */
 	let goToCoordinatesConfirm = (x: HTMLInputElement, z: HTMLInputElement) => {
 		let toX = getLiteralCoord(-Number(x.value == '' ? 0 : x.value));
 		let toZ = getLiteralCoord(Number(z.value == '' ? 0 : z.value));
@@ -465,7 +527,34 @@
 		view.animate({ center: [toX, toZ] });
 	};
 
+	// If the modal should be shown or not
+	let changeIconSizeActive = false;
+
+	/**
+	 * Change the size of the in-map icons
+	 */
+	let changeIconSizeConfirm = (size: HTMLInputElement) => {
+		iconSize.update(() => Number(size.value));
+
+		waypointLayers.traders.forEach((e) => {
+			const source = e.layer.getSource();
+			source?.refresh();
+		});
+		waypointLayers.waypoints.forEach((e) => {
+			const source = e.layer.getSource();
+			source?.refresh();
+		});
+		waypointLayers.translocators.forEach((e) => {
+			const source = e.layer.getSource();
+			source?.refresh();
+		});
+
+		changeIconSizeActive = false;
+		--activeModalsCounter;
+	};
+
 	onDestroy(() => {
+		iconSizeUnsuscribe();
 		legendWaypointStatesUnsuscribe();
 		legendMenusStatesUnsuscribe();
 	});
@@ -504,7 +593,7 @@
 
 		<!-- Open Go To Coordinate Modal -->
 		<button
-			class="p-2"
+			class="p-2 border-b-[1px] border-solid border-zinc-200"
 			on:click={() => {
 				goToCoordinatesActive = true;
 				++activeModalsCounter;
@@ -513,15 +602,28 @@
 		>
 			<SearchSVG classe="w-4 h-4 text-zinc-200" />
 		</button>
+
+		<!-- Open Change Icon Size Modal -->
+		<button
+			class="p-2"
+			on:click={() => {
+				changeIconSizeActive = true;
+				++activeModalsCounter;
+			}}
+			title={mapTexts.changeIconSize}
+		>
+			<VRulerSVG classe="w-4 h-4 text-zinc-200" />
+		</button>
 	</div>
 
+	<!-- Legend -->
 	<div
 		id="legend"
-		class="absolute top-2 left-2 bg-zinc-900 w-1/3 max-w-56 h-fit rounded flex flex-col p-2 gap-2 text-sm"
+		class="absolute top-2 left-2 bg-zinc-900 w-1/3 max-w-56 h-fit max-h-[calc(100%-1rem)] overflow-y-scroll rounded flex flex-col p-2 pr-1 gap-2 text-sm"
 	>
 		<!-- Traders Section -->
 		{#if waypointConfig.traders != undefined && waypointConfig.traders.values.length > 0}
-			<div class="border-solid border-2 border-zinc-200 rounded">
+			<div>
 				<div class="flex flex-row justify-between p-1 px-2">
 					<h1 class="font-bold">{waypointConfig.traders.name}</h1>
 					<div class="flex flex-row gap-2 ml-4">
@@ -553,12 +655,15 @@
 					}`}
 				>
 					{#each waypointConfig.traders.values as layer}
-						<div class="p-1 px-2 odd:bg-zinc-800 flex flex-row justify-between gap-4 group">
-							<h1
-								class="overflow-hidden text-ellipsis whitespace-nowrap select-none group-hover:whitespace-normal"
-							>
-								{layer.name}
-							</h1>
+						<div class="p-1 px-2 odd:bg-zinc-800 flex flex-row justify-between gap-2 group">
+							<div class="flex flex-row gap-2 w-[calc(100%-1.5rem)]">
+								<img src={layer.icon} alt={layer.name} />
+								<h1
+									class="overflow-hidden text-ellipsis whitespace-nowrap select-none group-hover:whitespace-normal"
+								>
+									{layer.name}
+								</h1>
+							</div>
 							<button
 								on:click={() =>
 									toggleWaypointVisivility(
@@ -581,7 +686,7 @@
 
 		<!-- Translocators Section -->
 		{#if waypointConfig.translocators != undefined && waypointConfig.translocators.values.length > 0}
-			<div class="border-solid border-2 border-zinc-200 rounded">
+			<div>
 				<div class="flex flex-row justify-between p-1 px-2">
 					<h1 class="font-bold">{waypointConfig.translocators.name}</h1>
 					<div class="flex flex-row gap-2 ml-4">
@@ -617,11 +722,14 @@
 				>
 					{#each waypointConfig.translocators.values as layer}
 						<div class="p-1 px-2 odd:bg-zinc-800 flex flex-row justify-between gap-4 group">
-							<h1
-								class="overflow-hidden text-ellipsis whitespace-nowrap select-none group-hover:whitespace-normal"
-							>
-								{layer.name}
-							</h1>
+							<div class="flex flex-row gap-2 w-[calc(100%-1.5rem)]">
+								<img src={layer.icon} alt={layer.name} />
+								<h1
+									class="overflow-hidden text-ellipsis whitespace-nowrap select-none group-hover:whitespace-normal"
+								>
+									{layer.name}
+								</h1>
+							</div>
 							<button
 								on:click={() =>
 									toggleWaypointVisivility(
@@ -646,7 +754,7 @@
 
 		<!-- Waypoints Section -->
 		{#if waypointConfig.waypoints != undefined && waypointConfig.waypoints.values.length > 0}
-			<div class="border-solid border-2 border-zinc-200 rounded">
+			<div>
 				<div class="flex flex-row justify-between p-1 px-2">
 					<h1 class="font-bold">{waypointConfig.waypoints.name}</h1>
 					<div class="flex flex-row gap-2 ml-4">
@@ -679,11 +787,14 @@
 				>
 					{#each waypointConfig.waypoints.values as layer}
 						<div class="p-1 px-2 odd:bg-zinc-800 flex flex-row justify-between gap-4 group">
-							<h1
-								class="overflow-hidden text-ellipsis whitespace-nowrap select-none group-hover:whitespace-normal"
-							>
-								{layer.name}
-							</h1>
+							<div class="flex flex-row gap-2 w-[calc(100%-1.5rem)]">
+								<img src={layer.icon} alt={layer.name} />
+								<h1
+									class="overflow-hidden text-ellipsis whitespace-nowrap select-none group-hover:whitespace-normal"
+								>
+									{layer.name}
+								</h1>
+							</div>
 							<button
 								on:click={() =>
 									toggleWaypointVisivility(
@@ -712,7 +823,19 @@
 		<GoToCoordinatesModal
 			onConfirm={goToCoordinatesConfirm}
 			onClose={() => {
-				goToCoordinatesActive = !goToCoordinatesActive;
+				goToCoordinatesActive = false;
+				--activeModalsCounter;
+			}}
+		/>
+	{/if}
+
+	<!-- Change Icon Size Modal -->
+	{#if changeIconSizeActive && activeModalsCounter == 1}
+		<ChangeIconSizeModal
+			currentSize={$iconSize}
+			onConfirm={changeIconSizeConfirm}
+			onClose={() => {
+				changeIconSizeActive = false;
 				--activeModalsCounter;
 			}}
 		/>

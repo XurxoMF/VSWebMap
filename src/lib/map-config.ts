@@ -12,8 +12,10 @@ export const mapTexts = {
 	zoomIn: 'Acercar',
 	zoomOut: 'Alejar',
 	goToCoordinates: 'Ir a las coordenadas',
-	goToCoordinatesXPlaceholder: `Coordenada X`,
-	goToCoordinatesZPlaceholder: `Coordenada Z`
+	goToCoordinatesXPlaceholder: 'Coordenada X',
+	goToCoordinatesZPlaceholder: 'Coordenada Z',
+	changeIconSize: 'Cambiar el tamaño de los waypoints',
+	changeIconSizePlaceholder: 'Nuevo tamaño'
 };
 
 /**
@@ -26,7 +28,7 @@ export const mapTexts = {
  *		values: [
  *			{
  *				type: string, // Name shown on the geojson file and ID of the waypoint.
- *				rgb: [number, number, number], // Color used for the icon.
+ *				rgb: [number, number, number], // Only for translocators. Color used by the line conecting them.
  *				icon: string, // Route of the SVG used as icon. / is the static folder. Default /map_icons/icon.svg.
  *				minZoom: number, // 0 = always visible, 11 = only visible with zoom extremely close to the ground.
  *				name: string // Name to show on the legend and some other places.
@@ -51,65 +53,56 @@ export const waypointConfig: WaypointConfig = {
 		values: [
 			{
 				type: 'Agriculture trader',
-				rgb: [255, 0, 255],
-				icon: '/map_icons/trader.svg',
-				minZoom: 6,
+				icon: '/map_icons/trader/agriculture.svg',
+				minZoom: 5,
 				name: 'Comerciante agrícola'
 			},
 			{
 				type: 'Trader (Artisan)',
-				rgb: [255, 0, 255],
-				icon: '/map_icons/trader.svg',
-				minZoom: 6,
+				icon: '/map_icons/trader/artisan.svg',
+				minZoom: 5,
 				name: 'Comerciante artesano'
 			},
 			{
 				type: 'Building materials trader',
-				rgb: [255, 0, 255],
-				icon: '/map_icons/trader.svg',
-				minZoom: 6,
+				icon: '/map_icons/trader/building-materials.svg',
+				minZoom: 5,
 				name: 'Comerciante de materiales de construcción'
 			},
 			{
 				type: 'Clothing trader',
-				rgb: [255, 0, 255],
-				icon: '/map_icons/trader.svg',
-				minZoom: 6,
+				icon: '/map_icons/trader/clothing.svg',
+				minZoom: 5,
 				name: 'Comerciante de ropa'
 			},
 			{
 				type: 'Commodities trader',
-				rgb: [255, 0, 255],
-				icon: '/map_icons/trader.svg',
-				minZoom: 6,
+				icon: '/map_icons/trader/commodities.svg',
+				minZoom: 5,
 				name: 'Comerciante de materias primas'
 			},
 			{
 				type: 'Furniture trader',
-				rgb: [255, 0, 255],
-				icon: '/map_icons/trader.svg',
-				minZoom: 6,
+				icon: '/map_icons/trader/furniture.svg',
+				minZoom: 5,
 				name: 'Comerciante de muebles'
 			},
 			{
 				type: 'Luxuries trader',
-				rgb: [255, 0, 255],
-				icon: '/map_icons/trader.svg',
-				minZoom: 6,
+				icon: '/map_icons/trader/luxuries.svg',
+				minZoom: 5,
 				name: 'Comerciante de lujos'
 			},
 			{
 				type: 'Survival goods trader',
-				rgb: [255, 0, 255],
-				icon: '/map_icons/trader.svg',
-				minZoom: 6,
+				icon: '/map_icons/trader/survival-goods.svg',
+				minZoom: 5,
 				name: 'Comerciante de bienes de supervivencia'
 			},
 			{
 				type: 'Treasure hunter trader',
-				rgb: [255, 0, 255],
-				icon: '/map_icons/trader.svg',
-				minZoom: 6,
+				icon: '/map_icons/trader/treasure-hunter.svg',
+				minZoom: 5,
 				name: 'Comerciante cazador de tesoros'
 			}
 		]
@@ -120,8 +113,8 @@ export const waypointConfig: WaypointConfig = {
 		values: [
 			{
 				type: 'Translocator',
-				rgb: [255, 0, 0],
-				icon: '/map_icons/spiral.svg',
+				rgb: [127, 4, 183],
+				icon: '/map_icons/in-game/spiral.svg',
 				minZoom: 3,
 				name: 'Translocador'
 			}
@@ -133,17 +126,21 @@ export const waypointConfig: WaypointConfig = {
 		values: [
 			{
 				type: 'Base',
-				rgb: [0, 0, 255],
-				icon: '/map_icons/home.svg',
-				minZoom: 6,
+				icon: '/map_icons/in-game/home.svg',
+				minZoom: 4,
 				name: 'Base'
 			},
 			{
 				type: 'TIENDA',
-				rgb: [0, 0, 255],
-				icon: '/map_icons/shop.svg',
+				icon: '/map_icons/misc/shop.svg',
 				minZoom: 5,
 				name: 'Tienda'
+			},
+			{
+				type: 'RESTAURANTE',
+				icon: '/map_icons/misc/knife-and-fork.svg',
+				minZoom: 5,
+				name: 'Restaurante'
 			}
 		]
 	}
@@ -158,7 +155,6 @@ type WaypointConfig = {
 		name: string;
 		values: {
 			type: string;
-			rgb: number[];
 			icon: string;
 			minZoom: number;
 			name: string;
@@ -180,7 +176,6 @@ type WaypointConfig = {
 		name: string;
 		values: {
 			type: string;
-			rgb: number[];
 			icon: string;
 			minZoom: number;
 			name: string;

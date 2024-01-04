@@ -8,3 +8,4 @@ export { default as VisibleSVG } from './visible.svelte';
 export { default as HiddenSVG } from './hidden.svelte';
 export { default as ArrowDownSVG } from './arrow-down.svelte';
 export { default as ArrowUpSVG } from './arrow-up.svelte';
+export { default as VRulerSVG } from './v-ruler.svelte';
