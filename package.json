@@ -1,6 +1,6 @@
 {
 	"name": "vswebmap",
-	"version": "1.0.0-pre6",
+	"version": "1.0.0",
 	"private": true,
 	"scripts": {
 		"dev": "vite dev --host",
