@@ -12,7 +12,7 @@ export let pages = [
 	},
 	{
 		name: 'Normas',
-		route: 'rules'
+		route: '/rules'
 	}
 ];
 
