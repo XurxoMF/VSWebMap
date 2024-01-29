@@ -137,7 +137,7 @@ export const waypointConfig: WaypointConfig = {
 				name: 'Tienda'
 			},
 			{
-				type: 'RESTAURANTE',
+				type: 'RESTAU',
 				icon: '/map_icons/misc/knife-and-fork.svg',
 				minZoom: 5,
 				name: 'Restaurante'
