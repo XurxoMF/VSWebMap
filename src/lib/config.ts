@@ -51,7 +51,6 @@ export let texts = {
 		'PvE + PvP activado para defensa propia',
 		'Empiezas con 1 engranaje temporal',
 		'Anticheat por si las moscas',
-		'Resonance Archives bloqueado, será un evento del servidor',
 		'Con océanos, continentes y ríos con corriente',
 		'Mazmorras, estructuras y minas enormes',
 		'El fuego no se propaga',
