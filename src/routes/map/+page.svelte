@@ -27,7 +27,7 @@
 		VRulerSVG
 	} from '$lib/components/svg/index';
 	import { GoToCoordinatesModal, ChangeIconSizeModal } from '$lib/components/modals';
-	import { mapConfig, mapTexts, waypointConfig } from '$lib/map-config';
+	import { mapConfig, mapTexts, waypointConfig, spawnLocation } from '$lib/map-config';
 	import { getFriendlyCoord, getLiteralCoord, getOppositeAbsolute } from '$lib/helpers';
 
 	/* 
@@ -187,23 +187,43 @@
 		let vectorSource = new VectorSource({
 			loader: (extent, resolution, projection) => {
 				const format = new GeoJSON();
-				fetch('/map_data/geojson/landmarks.geojson')
-					.then((response) => response.json())
-					.then((json) => {
-						let features = <Feature<Geometry>[]>format.readFeatures(json);
 
-						features = features.filter((f) => f.getProperties()['type'] == type.type);
+				if (type.type == 'Spawn') {
+					const spawn = {
+						type: 'Feature',
+						geometry: {
+							type: 'Point',
+							coordinates: [spawnLocation.x, spawnLocation.z] // Reemplaza longitud y latitud con tus valores
+						},
+						properties: {
+							name: type.name,
+							type: type.type,
+							label: spawnLocation.label
+						}
+					};
 
-						features.forEach((feature) => {
-							const geometry = feature.getGeometry();
-							if (geometry instanceof Point) {
-								let coords = geometry.getCoordinates();
-								geometry.setCoordinates([coords[0], getOppositeAbsolute(coords[1])]);
-							}
+					let features = <Feature<Geometry>[]>format.readFeatures(spawn);
+
+					vectorSource.addFeatures(features);
+				} else {
+					fetch('/map_data/geojson/landmarks.geojson')
+						.then((response) => response.json())
+						.then((json) => {
+							let features = <Feature<Geometry>[]>format.readFeatures(json);
+
+							features = features.filter((f) => f.getProperties()['type'] == type.type);
+
+							features.forEach((feature) => {
+								const geometry = feature.getGeometry();
+								if (geometry instanceof Point) {
+									let coords = geometry.getCoordinates();
+									geometry.setCoordinates([coords[0], getOppositeAbsolute(coords[1])]);
+								}
+							});
+
+							vectorSource.addFeatures(features);
 						});
-
-						vectorSource.addFeatures(features);
-					});
+				}
 			}
 		});
 

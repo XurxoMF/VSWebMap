@@ -19,6 +19,15 @@ export const mapTexts = {
 };
 
 /**
+ * Coordinates for the spawn waypoint.
+ */
+export const spawnLocation = {
+	x: 511848,
+	z: 511956,
+	label: 'Spawn'
+};
+
+/**
  * Config for each waypoint inside each category.
  *
  * ```
@@ -124,6 +133,12 @@ export const waypointConfig: WaypointConfig = {
 		group: 'Waypoints',
 		name: 'Puntos de interés',
 		values: [
+			{
+				type: 'Spawn',
+				icon: '/map_icons/in-game/star2.svg',
+				minZoom: 0,
+				name: 'Spawn'
+			},
 			{
 				type: 'Base',
 				icon: '/map_icons/in-game/home.svg',
