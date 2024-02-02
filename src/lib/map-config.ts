@@ -61,58 +61,58 @@ export const waypointConfig: WaypointConfig = {
 		name: 'Comerciantes',
 		values: [
 			{
-				type: 'Agriculture trader',
+				type: 'Comerciante de agricultura',
 				icon: '/map_icons/trader/agriculture.svg',
 				minZoom: 5,
-				name: 'Comerciante agrícola'
+				name: 'Comerciante de agricultura'
 			},
 			{
-				type: 'Trader (Artisan)',
+				type: 'Comerciante artesano',
 				icon: '/map_icons/trader/artisan.svg',
 				minZoom: 5,
 				name: 'Comerciante artesano'
 			},
 			{
-				type: 'Building materials trader',
+				type: 'Comerciante de materiales de construcción',
 				icon: '/map_icons/trader/building-materials.svg',
 				minZoom: 5,
 				name: 'Comerciante de materiales de construcción'
 			},
 			{
-				type: 'Clothing trader',
+				type: 'Comerciante de prendas',
 				icon: '/map_icons/trader/clothing.svg',
 				minZoom: 5,
 				name: 'Comerciante de prendas'
 			},
 			{
-				type: 'Commodities trader',
+				type: 'Comerciante de productos básicos',
 				icon: '/map_icons/trader/commodities.svg',
 				minZoom: 5,
-				name: 'Comerciante de materias primas'
+				name: 'Comerciante de productos básicos'
 			},
 			{
-				type: 'Furniture trader',
+				type: 'Comerciante de muebles',
 				icon: '/map_icons/trader/furniture.svg',
 				minZoom: 5,
 				name: 'Comerciante de muebles'
 			},
 			{
-				type: 'Luxuries trader',
+				type: 'Comerciante de lujos',
 				icon: '/map_icons/trader/luxuries.svg',
 				minZoom: 5,
 				name: 'Comerciante de lujos'
 			},
 			{
-				type: 'Survival goods trader',
+				type: 'Comerciante de bienes de supervivencia',
 				icon: '/map_icons/trader/survival-goods.svg',
 				minZoom: 5,
 				name: 'Comerciante de bienes de supervivencia'
 			},
 			{
-				type: 'Treasure hunter trader',
+				type: 'Comerciante buscador de tesoros',
 				icon: '/map_icons/trader/treasure-hunter.svg',
 				minZoom: 5,
-				name: 'Comerciante cazador de tesoros'
+				name: 'Comerciante buscador de tesoros'
 			}
 		]
 	},
@@ -121,7 +121,7 @@ export const waypointConfig: WaypointConfig = {
 		name: 'Translocadores',
 		values: [
 			{
-				type: 'Translocator',
+				type: 'Translocador',
 				rgb: [127, 4, 183],
 				icon: '/map_icons/in-game/spiral.svg',
 				minZoom: 3,
@@ -134,13 +134,13 @@ export const waypointConfig: WaypointConfig = {
 		name: 'Puntos de interés',
 		values: [
 			{
-				type: 'Spawn',
+				type: 'SPAWN',
 				icon: '/map_icons/in-game/star2.svg',
 				minZoom: 0,
 				name: 'Spawn'
 			},
 			{
-				type: 'Base',
+				type: 'BASE',
 				icon: '/map_icons/in-game/home.svg',
 				minZoom: 4,
 				name: 'Base'

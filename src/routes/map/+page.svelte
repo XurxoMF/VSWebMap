@@ -188,7 +188,7 @@
 			loader: (extent, resolution, projection) => {
 				const format = new GeoJSON();
 
-				if (type.type == 'Spawn') {
+				if (type.type == 'SPAWN') {
 					const spawn = {
 						type: 'Feature',
 						geometry: {
