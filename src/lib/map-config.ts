@@ -82,7 +82,7 @@ export const waypointConfig: WaypointConfig = {
 				type: 'Clothing trader',
 				icon: '/map_icons/trader/clothing.svg',
 				minZoom: 5,
-				name: 'Comerciante de ropa'
+				name: 'Comerciante de prendas'
 			},
 			{
 				type: 'Commodities trader',
