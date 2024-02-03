@@ -140,7 +140,7 @@ export const waypointConfig: WaypointConfig = {
 				name: 'Spawn'
 			},
 			{
-				type: 'BASE',
+				type: 'Base',
 				icon: '/map_icons/in-game/home.svg',
 				minZoom: 4,
 				name: 'Base'
