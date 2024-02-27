@@ -47,7 +47,6 @@ export let texts = {
 	ListServerFeaturesHTML: [
 		'Abierto 24/7/365',
 		'32 jugadores simultáneos',
-		'Whitelist',
 		'PvE + PvP activado para defensa propia',
 		'Empiezas con 1 engranaje temporal',
 		'Anticheat por si las moscas',

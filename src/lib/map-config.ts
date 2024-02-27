@@ -61,6 +61,12 @@ export const waypointConfig: WaypointConfig = {
 		name: 'Comerciantes',
 		values: [
 			{
+				type: 'Kitchenware Trader',
+				icon: '/map_icons/landmark/campfire.svg',
+				minZoom: 5,
+				name: 'Comerciante Concinero'
+			},
+			{
 				type: 'Comerciante de agricultura',
 				icon: '/map_icons/trader/agriculture.svg',
 				minZoom: 5,
