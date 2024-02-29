@@ -63,61 +63,61 @@ export const waypointConfig: WaypointConfig = {
 			{
 				type: 'Kitchenware Trader',
 				icon: '/map_icons/landmark/campfire.svg',
-				minZoom: 5,
+				minZoom: 3,
 				name: 'Comerciante Concinero'
 			},
 			{
 				type: 'Comerciante de agricultura',
 				icon: '/map_icons/trader/agriculture.svg',
-				minZoom: 5,
+				minZoom: 3,
 				name: 'Comerciante de agricultura'
 			},
 			{
 				type: 'Comerciante artesano',
 				icon: '/map_icons/trader/artisan.svg',
-				minZoom: 5,
+				minZoom: 3,
 				name: 'Comerciante artesano'
 			},
 			{
 				type: 'Comerciante de materiales de construcción',
 				icon: '/map_icons/trader/building-materials.svg',
-				minZoom: 5,
+				minZoom: 3,
 				name: 'Comerciante de materiales de construcción'
 			},
 			{
 				type: 'Comerciante de prendas',
 				icon: '/map_icons/trader/clothing.svg',
-				minZoom: 5,
+				minZoom: 3,
 				name: 'Comerciante de prendas'
 			},
 			{
 				type: 'Comerciante de productos básicos',
 				icon: '/map_icons/trader/commodities.svg',
-				minZoom: 5,
+				minZoom: 3,
 				name: 'Comerciante de productos básicos'
 			},
 			{
 				type: 'Comerciante de muebles',
 				icon: '/map_icons/trader/furniture.svg',
-				minZoom: 5,
+				minZoom: 3,
 				name: 'Comerciante de muebles'
 			},
 			{
 				type: 'Comerciante de lujos',
 				icon: '/map_icons/trader/luxuries.svg',
-				minZoom: 5,
+				minZoom: 3,
 				name: 'Comerciante de lujos'
 			},
 			{
 				type: 'Comerciante de bienes de supervivencia',
 				icon: '/map_icons/trader/survival-goods.svg',
-				minZoom: 5,
+				minZoom: 3,
 				name: 'Comerciante de bienes de supervivencia'
 			},
 			{
 				type: 'Comerciante buscador de tesoros',
 				icon: '/map_icons/trader/treasure-hunter.svg',
-				minZoom: 5,
+				minZoom: 3,
 				name: 'Comerciante buscador de tesoros'
 			}
 		]
@@ -130,7 +130,7 @@ export const waypointConfig: WaypointConfig = {
 				type: 'Translocador',
 				rgb: [127, 4, 183],
 				icon: '/map_icons/in-game/spiral.svg',
-				minZoom: 3,
+				minZoom: 1,
 				name: 'Translocador'
 			}
 		]
@@ -148,19 +148,19 @@ export const waypointConfig: WaypointConfig = {
 			{
 				type: 'Base',
 				icon: '/map_icons/in-game/home.svg',
-				minZoom: 4,
+				minZoom: 0,
 				name: 'Base'
 			},
 			{
 				type: 'TIENDA',
 				icon: '/map_icons/misc/shop.svg',
-				minZoom: 5,
+				minZoom: 2,
 				name: 'Tienda'
 			},
 			{
 				type: 'RESTAU',
 				icon: '/map_icons/misc/knife-and-fork.svg',
-				minZoom: 5,
+				minZoom: 2,
 				name: 'Restaurante'
 			}
 		]
